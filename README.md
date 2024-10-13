@@ -10,11 +10,13 @@ NOTE: The projects are only meant to be workshop resources and shall not be used
 
 To participate in the workshop, you will need the following things on your development machine:
 
+- [git](https://git-scm.com/)
 - [node](https://nodejs.org/en) (version as of writing this: 20)
 - [dotnet core sdk](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) (version as of writing this: 8)
 - a code editor for developing
   - TypeScript
   - C#
+- a way to run containers, like [docker](https://www.docker.com/) or [podman](https://podman.io/)
 
 ## Debugging quick start
 
