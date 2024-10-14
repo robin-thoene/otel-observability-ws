@@ -1,0 +1,17 @@
+[
+  {
+    "id": 1,
+    "title": "Dotnet Basics",
+    "description": "This workshop provides an introduction to the fundamentals of .NET, a versatile and powerful framework for building applications. Participants will learn the basics of the .NET ecosystem, including C# syntax, object-oriented programming principles, and how to create simple console applications. Perfect for beginners looking to get started with modern software development."
+  },
+  {
+    "id": 2,
+    "title": "Next.js for beginners",
+    "description": "This workshop introduces the basics of Next.js, a popular React framework for building fast and scalable web applications. Attendees will learn how to set up a Next.js project, create pages, navigate between routes, and implement server-side rendering. Ideal for those new to Next.js and looking to enhance their frontend development skills."
+  },
+  {
+    "id": 3,
+    "title": "Rust for real evangelists",
+    "description": "This workshop dives into the core concepts of Rust, a systems programming language known for its safety and performance. Participants will explore Rust’s unique features like ownership, borrowing, and lifetimes, while learning how to write efficient and secure code. Tailored for passionate developers who want to advocate for Rust's modern approach to memory safety and concurrency."
+  }
+]
