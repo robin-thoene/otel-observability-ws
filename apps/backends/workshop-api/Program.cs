@@ -1,3 +1,5 @@
+using System.Text;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,12 +26,47 @@ app.MapGet("/workshops", async (WorkshopDbContext db) =>
 }).WithOpenApi();
 app.MapGet("/workshops/{id}", async (int id, WorkshopDbContext db) =>
 {
-    var workshop = await db.Workshops.FirstOrDefaultAsync(w => w.Id == id);
+    var workshop = await db.Workshops.Include(w => w.WorkShopParticipants).FirstOrDefaultAsync(w => w.Id == id);
     if (workshop is null)
     {
         return Results.NotFound();
     }
-    return Results.Ok(workshop);
+    var participants = new ExternalUser[] { };
+    var query = new StringBuilder();
+    if (workshop.WorkShopParticipants.Any())
+    {
+        var i = 0;
+        foreach (var wp in workshop.WorkShopParticipants)
+        {
+            if (i == 0)
+            {
+                query.Append($"?userIds={wp.UserId}");
+            }
+            else
+            {
+                query.Append($"&userIds={wp.UserId}");
+            }
+            i++;
+        }
+        using var httpClient = new HttpClient();
+        httpClient.BaseAddress = new Uri("http://localhost:5046");
+        var response = await httpClient.GetAsync($"users{query.ToString()}");
+        if (!response.IsSuccessStatusCode)
+        {
+            return Results.StatusCode(500);
+        }
+        participants = await response.Content.ReadFromJsonAsync<ExternalUser[]>(new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        });
+    }
+    return Results.Ok(new
+    {
+        Id = workshop.Id,
+        Title = workshop.Title,
+        Description = workshop.Description,
+        Participants = participants
+    });
 }).WithOpenApi();
 app.MapDelete("/workshops/{id}", async (int id, WorkshopDbContext db) =>
 {
@@ -66,10 +103,51 @@ app.MapPut("/workshops", async ([FromBody] Workshop model, WorkshopDbContext db)
     await db.SaveChangesAsync();
     return Results.NoContent();
 }).WithOpenApi();
+app.MapPost("/workshops/participant", async ([FromBody] AddParticipantModel model, WorkshopDbContext db) =>
+{
+    var exist = await db.WorkShopParticipants.AnyAsync(x => x.UserId == model.UserId && x.WorkshopId == model.WorkshopId);
+    if (exist)
+    {
+        return Results.BadRequest();
+    }
+    var entity = new WorkshopParticipant
+    {
+        Id = 0,
+        WorkshopId = model.WorkshopId,
+        UserId = model.UserId
+    };
+    var workshops = db.WorkShopParticipants.Add(entity);
+    await db.SaveChangesAsync();
+    return Results.Created();
+}).WithOpenApi();
+app.MapDelete("/workshops/{wid}/participant/{uid}", async (int wid, int uid, WorkshopDbContext db) =>
+{
+    var entity = await db.WorkShopParticipants.FirstOrDefaultAsync(x => x.UserId == uid && x.WorkshopId == wid);
+    if (entity is null)
+    {
+        return Results.BadRequest();
+    }
+    var workshops = db.WorkShopParticipants.Remove(entity);
+    await db.SaveChangesAsync();
+    return Results.NoContent();
+}).WithOpenApi();
 app.Run();
 
 public class WorkshopCreateModel
 {
     public required string Title { get; set; }
     public required string Description { get; set; }
+}
+
+public class AddParticipantModel
+{
+    public required int WorkshopId { get; set; }
+    public required int UserId { get; set; }
+}
+
+public class ExternalUser
+{
+    public int Id { get; set; }
+    public required string FirstName { get; set; }
+    public required string LastName { get; set; }
 }

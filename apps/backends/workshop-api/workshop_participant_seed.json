@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1,
+    "workshopId": 1,
+    "userId": 1
+  },
+  {
+    "id": 2,
+    "workshopId": 1,
+    "userId": 8
+  },
+  {
+    "id": 3,
+    "workshopId": 1,
+    "userId": 22
+  },
+  {
+    "id": 4,
+    "workshopId": 1,
+    "userId": 3
+  },
+  {
+    "id": 5,
+    "workshopId": 1,
+    "userId": 7
+  },
+  {
+    "id": 6,
+    "workshopId": 1,
+    "userId": 11
+  },
+  {
+    "id": 7,
+    "workshopId": 1,
+    "userId": 13
+  },
+  {
+    "id": 8,
+    "workshopId": 1,
+    "userId": 26
+  },
+  {
+    "id": 9,
+    "workshopId": 2,
+    "userId": 26
+  }
+]
