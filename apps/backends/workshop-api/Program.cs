@@ -29,7 +29,7 @@ app.MapGet("/workshops/{id}", async (int id, WorkshopDbContext db) =>
     var workshop = await db.Workshops.Include(w => w.WorkShopParticipants).FirstOrDefaultAsync(w => w.Id == id);
     if (workshop is null)
     {
-        return Results.NotFound();
+        return Results.NotFound($"No workshop with id {id} exists");
     }
     var participants = new ExternalUser[] { };
     var query = new StringBuilder();
@@ -73,7 +73,7 @@ app.MapDelete("/workshops/{id}", async (int id, WorkshopDbContext db) =>
     var workshop = await db.Workshops.FirstOrDefaultAsync(w => w.Id == id);
     if (workshop is null)
     {
-        return Results.NotFound();
+        return Results.NotFound($"No workshop with id {id} exists");
     }
     db.Workshops.Remove(workshop);
     await db.SaveChangesAsync();
@@ -89,26 +89,26 @@ app.MapPost("/workshops", async ([FromBody] WorkshopCreateModel model, WorkshopD
     };
     db.Workshops.Add(entity);
     await db.SaveChangesAsync();
-    return Results.Created();
+    return Results.Ok(entity);
 }).WithOpenApi();
 app.MapPut("/workshops", async ([FromBody] Workshop model, WorkshopDbContext db) =>
 {
     var current = await db.Workshops.FirstOrDefaultAsync(w => w.Id == model.Id);
     if (current is null)
     {
-        return Results.NotFound();
+        return Results.NotFound($"No workshop with id {model.Id} exists");
     }
     current.Title = model.Title;
     current.Description = model.Description;
     await db.SaveChangesAsync();
-    return Results.NoContent();
+    return Results.Ok(current);
 }).WithOpenApi();
 app.MapPost("/workshops/participant", async ([FromBody] AddParticipantModel model, WorkshopDbContext db) =>
 {
     var exist = await db.WorkShopParticipants.AnyAsync(x => x.UserId == model.UserId && x.WorkshopId == model.WorkshopId);
     if (exist)
     {
-        return Results.BadRequest();
+        return Results.BadRequest("The user is also stored as participant");
     }
     var entity = new WorkshopParticipant
     {
@@ -125,7 +125,7 @@ app.MapDelete("/workshops/{wid}/participant/{uid}", async (int wid, int uid, Wor
     var entity = await db.WorkShopParticipants.FirstOrDefaultAsync(x => x.UserId == uid && x.WorkshopId == wid);
     if (entity is null)
     {
-        return Results.BadRequest();
+        return Results.BadRequest("The provided user is no participant in the provided workshop");
     }
     var workshops = db.WorkShopParticipants.Remove(entity);
     await db.SaveChangesAsync();
