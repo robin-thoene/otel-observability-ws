@@ -24,13 +24,30 @@ export function EditableWorkshop(props: IProps) {
     const [workshop, setWorkshop] = useState<IWorkshopDetail>(props.workshop);
 
     /** Add a user to the workshop. */
-    const handleUserSelect = (user: IUser) => {
-        // const updatedParticipants = [...workshop.participants, user];
-        // setWorkshop((prevWorkshop) => ({
-        //   ...prevWorkshop,
-        //   participants: updatedParticipants,
-        // }));
-        toast.success(`${user.firstName} ${user.lastName} wurde hinzugefügt!`);
+    const handleUserSelect = async (user: IUser) => {
+        const participants = [workshop.participants, user];
+        const body = {
+            id: workshop.id,
+            title: workshop.title,
+            description: workshop.description,
+            participants: participants,
+        };
+        try {
+            const res = await fetch('/api/update_workshop', {
+                method: 'PUT',
+                body: JSON.stringify(body),
+            });
+            if (res.ok) {
+                const updatedWorkshop = (await res.json()) as IWorkshopDetail;
+                setWorkshop({ ...updatedWorkshop, participants: updatedWorkshop.participants || [] });
+                toast.success(`${user.firstName} ${user.lastName} wurde hinzugefügt!`);
+            } else {
+                const err = await res.text();
+                toast.error(err && err !== '' ? err : defErrorMessage);
+            }
+        } catch {
+            toast.error(defErrorMessage);
+        }
     };
 
     return (
