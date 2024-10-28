@@ -9,12 +9,11 @@ import { toast } from 'react-toastify';
 import { defErrorMessage } from '@/helper/static_texts';
 import { DataSearch } from './dataSearch';
 import { IUser } from '@/types/user';
+import { getUsers } from '@/helper/user_api';
 
 interface IProps {
     /** The workshop to display. */
     workshop: IWorkshopDetail;
-    /** All users to select participants from. */
-    users: IUser[];
 }
 
 export function EditableWorkshop(props: IProps) {
@@ -22,30 +21,22 @@ export function EditableWorkshop(props: IProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [editWorkshop, setEditWorkshop] = useState<IWorkshopDetail>(props.workshop);
     const [workshop, setWorkshop] = useState<IWorkshopDetail>(props.workshop);
+    const [searchResults, setSearchResults] = useState<IUser[]>([]);
 
-    /** Add a user to the workshop. */
-    const handleUserSelect = async (user: IUser) => {
-        const participants = [workshop.participants, user];
-        const body = {
-            id: workshop.id,
-            title: workshop.title,
-            description: workshop.description,
-            participants: participants,
-        };
+    /** The user search api call. */
+    const handleUserSearch = async (query: string) => {
+        if (query.trim() === '') {
+            setSearchResults([]);
+            return;
+        }
         try {
-            const res = await fetch('/api/update_workshop', {
-                method: 'PUT',
-                body: JSON.stringify(body),
-            });
-            if (res.ok) {
-                const updatedWorkshop = (await res.json()) as IWorkshopDetail;
-                setWorkshop({ ...updatedWorkshop, participants: updatedWorkshop.participants || [] });
-                toast.success(`${user.firstName} ${user.lastName} wurde hinzugefügt!`);
-            } else {
-                const err = await res.text();
-                toast.error(err && err !== '' ? err : defErrorMessage);
+            const response = await fetch(`/api/get_users?s=${encodeURIComponent(query)}`);
+            if (!response.ok) {
+                throw new Error('Fehler beim Abrufen der Benutzer.');
             }
-        } catch {
+            const results = await response.json();
+            setSearchResults(results || []);
+        } catch (error) {
             toast.error(defErrorMessage);
         }
     };
@@ -157,9 +148,10 @@ export function EditableWorkshop(props: IProps) {
             <h2>Teilnehmer hinzufügen</h2>
             <div>
                 <DataSearch<IUser>
-                    items={props.users}
+                    onSearch={handleUserSearch}
+                    searchResults={searchResults}
+                    existingItems={workshop.participants}
                     labelExtractor={(user) => `${user.firstName} ${user.lastName}`}
-                    onItemSelect={handleUserSelect}
                     placeholder="Search for a user..."
                 />
             </div>
