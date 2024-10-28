@@ -17,7 +17,7 @@ export default async function WorkshopDetail({
       <a href="/" className="fixed top-4 left-4">
         <HomeIcon className="size-5" />
       </a>
-      <EditableWorkshop workshop={workshop} />
+      <EditableWorkshop workshop={workshop}/>
     </div>
   );
 }
