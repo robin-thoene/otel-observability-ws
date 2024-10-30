@@ -31,6 +31,20 @@ export async function removeParticipant(workshopId: number, userId: number) {
   );
 }
 
+export async function addParticipant(workshopId: number, userId: number) {
+  const body = {
+    workshopId: workshopId,
+    userId: userId,
+  };
+  return await fetch(`${API_BASE_URL}/workshops/participant`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+}
+
 export async function updateWorkshop(
   id: number,
   title: string,
