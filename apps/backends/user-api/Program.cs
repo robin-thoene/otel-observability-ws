@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+// TODO: add OpenTelemetry instrumentation here
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<UserDbContext>(opt => opt.UseInMemoryDatabase("Db"));
@@ -15,8 +16,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseHttpsRedirection();
-app.MapGet("/users", async (UserDbContext db, int[]? userIds, string? s) =>
+app.MapGet("/users", async (UserDbContext db, ILogger<Program> logger, int[]? userIds, string? s) =>
 {
     var query = db.Users.AsQueryable();
     if (userIds is not null && userIds.Any())
@@ -28,6 +28,7 @@ app.MapGet("/users", async (UserDbContext db, int[]? userIds, string? s) =>
         query = query.Where(u => u.LastName.Contains(s, StringComparison.InvariantCultureIgnoreCase) || u.FirstName.Contains(s, StringComparison.InvariantCultureIgnoreCase));
     }
     var users = await query.ToListAsync();
+    logger.LogInformation("Found {UserCount} users", users.Count());
     return Results.Ok(users);
 })
 .WithOpenApi();

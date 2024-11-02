@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+// TODO: add OpenTelemetry instrumentation here
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<WorkshopDbContext>(opt => opt.UseInMemoryDatabase("Db"));
@@ -18,13 +19,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseHttpsRedirection();
-app.MapGet("/workshops", async (WorkshopDbContext db) =>
+app.MapGet("/workshops", async (WorkshopDbContext db, ILogger<Program> logger) =>
 {
     var workshops = await db.Workshops.Select(w => new { Id = w.Id, Title = w.Title }).ToListAsync();
+    logger.LogInformation("Found {WorkshopCount} workshops", workshops.Count());
     return Results.Ok(workshops);
 }).WithOpenApi();
-app.MapGet("/workshops/{id}", async (int id, WorkshopDbContext db) =>
+app.MapGet("/workshops/{id}", async (int id, WorkshopDbContext db, ILogger<Program> logger) =>
 {
     var workshop = await db.Workshops.Include(w => w.WorkShopParticipants).FirstOrDefaultAsync(w => w.Id == id);
     if (workshop is null)
@@ -53,6 +54,7 @@ app.MapGet("/workshops/{id}", async (int id, WorkshopDbContext db) =>
         var response = await httpClient.GetAsync($"users{query.ToString()}");
         if (!response.IsSuccessStatusCode)
         {
+            logger.LogError("Coud not get participants from the users api.");
             return Results.StatusCode(500);
         }
         participants = await response.Content.ReadFromJsonAsync<ExternalUser[]>(new JsonSerializerOptions
