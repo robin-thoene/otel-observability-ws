@@ -46,7 +46,20 @@ This repository provides the following applications that interact with each othe
 
 The following diagram outlines how those applications interact with another:
 
-// TODO: Add diagramm and description
+## Results
+
+You can find the instrumentation of the Next.js frontend [here](./apps/frontends/web/src/instrumentation.otel.ts), the
+instrumentation of the user-api [here](./apps/backends/user-api/Program.cs) and the instrumentation of the workshop-api
+[here](./apps/backends/workshop-api/Program.cs).
+
+In this workshop we used Datadog as example. To run the dd-agent locally that forwards your data to Datadog, run the following
+command:
+
+Ensure you replace the value for the api key and the hostname so you can filter in Datadog.
+
+```shell
+docker run --rm --cgroupns host --pid host --name dd-agent -v /proc/:/host/proc/:ro -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro -e DD_SITE="datadoghq.eu" -e DD_ENV=localhost -e DD_API_KEY=YOUR-API-KEY -e DD_HOSTNAME=YOUR-HOSTNAME -testing -e DD_OTLP_CONFIG_RECEIVER_PROTOCOLS_GRPC_ENDPOINT=0.0.0.0:4317 -e DD_OTLP_CONFIG_LOGS_ENABLED=true -e DD_LOGS_ENABLED=true  -p 4317:4317 gcr.io/datadoghq/agent:7
+```
 
 ## Additional resources
 

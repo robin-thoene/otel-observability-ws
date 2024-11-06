@@ -2,9 +2,36 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using OpenTelemetry;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+using Serilog;
+using Serilog.Events;
 
 var builder = WebApplication.CreateBuilder(args);
-// TODO: add OpenTelemetry instrumentation here
+// add OpenTelemetry instrumentation here
+var serviceName = "workshop-api";
+var grpcEndpoint = "http://localhost:4317";
+builder.Services.AddOpenTelemetry()
+    .UseOtlpExporter(OtlpExportProtocol.Grpc, new Uri(grpcEndpoint))
+    .ConfigureResource(res => res.AddService(serviceName))
+    .WithTracing(t => t.AddAspNetCoreInstrumentation().AddHttpClientInstrumentation());
+builder.Host.UseSerilog((ctx, services, config) =>
+{
+    config.MinimumLevel.Information()
+        .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+        .MinimumLevel.Override("Microsoft.AspNetCore.HttpLogging.HttpLoggingMiddleware", LogEventLevel.Warning)
+        .MinimumLevel.Override("System.Net.Http.HttpClient", LogEventLevel.Warning)
+        .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Warning);
+    config.WriteTo.Console();
+    config.WriteTo.OpenTelemetry(opt =>
+    {
+        opt.Endpoint = grpcEndpoint;
+        opt.ResourceAttributes.Add("service.name", serviceName);
+        opt.Protocol = Serilog.Sinks.OpenTelemetry.OtlpProtocol.Grpc;
+    });
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<WorkshopDbContext>(opt => opt.UseInMemoryDatabase("Db"));
