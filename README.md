@@ -58,7 +58,7 @@ command:
 Ensure you replace the value for the api key and the hostname so you can filter in Datadog.
 
 ```shell
-docker run --rm --cgroupns host --pid host --name dd-agent -v /proc/:/host/proc/:ro -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro -e DD_SITE="datadoghq.eu" -e DD_ENV=localhost -e DD_API_KEY=YOUR-API-KEY -e DD_HOSTNAME=YOUR-HOSTNAME -testing -e DD_OTLP_CONFIG_RECEIVER_PROTOCOLS_GRPC_ENDPOINT=0.0.0.0:4317 -e DD_OTLP_CONFIG_LOGS_ENABLED=true -e DD_LOGS_ENABLED=true  -p 4317:4317 gcr.io/datadoghq/agent:7
+docker run --rm --cgroupns host --pid host --name dd-agent -v /proc/:/host/proc/:ro -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro -e DD_SITE="datadoghq.eu" -e DD_ENV=localhost -e DD_API_KEY=YOUR-API-KEY -e DD_HOSTNAME=YOUR-HOSTNAME -e DD_OTLP_CONFIG_RECEIVER_PROTOCOLS_GRPC_ENDPOINT=0.0.0.0:4317 -e DD_OTLP_CONFIG_LOGS_ENABLED=true -e DD_LOGS_ENABLED=true  -p 4317:4317 gcr.io/datadoghq/agent:7
 ```
 
 ## Additional resources
