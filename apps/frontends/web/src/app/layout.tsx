@@ -16,7 +16,6 @@ export default function RootLayout({
         <ToastContainer
           closeButton={false}
           toastClassName="!bg-white dark:!bg-black border border-black dark:border-white text-red-200 !text-black dark:!text-white"
-          bodyClassName="text-black dark:text-white"
           closeOnClick
           autoClose={3000}
           transition={Slide}
