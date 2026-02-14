@@ -6,9 +6,10 @@ import { EditableWorkshop } from "@/components/editableWorkshop";
 export default async function WorkshopDetail({
   params,
 }: {
-  params: { id: number };
+  params: Promise<{ id: number }>;
 }) {
-  const workshop = await getWorkshop(params.id);
+  const id = (await params).id;
+  const workshop = await getWorkshop(id);
   if (!workshop) {
     notFound();
   }
@@ -17,7 +18,7 @@ export default async function WorkshopDetail({
       <a href="/" className="fixed top-4 left-4">
         <HomeIcon className="size-5" />
       </a>
-      <EditableWorkshop workshop={workshop}/>
+      <EditableWorkshop workshop={workshop} />
     </div>
   );
 }

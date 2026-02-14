@@ -20,119 +20,147 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 app.MapGet("/workshops", async (WorkshopDbContext db, ILogger<Program> logger) =>
-{
-    var workshops = await db.Workshops.Select(w => new { Id = w.Id, Title = w.Title }).ToListAsync();
-    logger.LogInformation("Found {WorkshopCount} workshops", workshops.Count());
-    return Results.Ok(workshops);
-}).WithOpenApi();
-app.MapGet("/workshops/{id}", async (int id, WorkshopDbContext db, ILogger<Program> logger) =>
-{
-    var workshop = await db.Workshops.Include(w => w.WorkShopParticipants).FirstOrDefaultAsync(w => w.Id == id);
-    if (workshop is null)
     {
-        return Results.NotFound($"No workshop with id {id} exists");
-    }
-    var participants = new ExternalUser[] { };
-    var query = new StringBuilder();
-    if (workshop.WorkShopParticipants.Any())
+        var workshops = await db.Workshops.Select(w => new { Id = w.Id, Title = w.Title }).ToListAsync();
+        logger.LogInformation("Found {WorkshopCount} workshops", workshops.Count());
+        return Results.Ok(workshops);
+    })
+    .AddOpenApiOperationTransformer((operation, context, ct) =>
     {
-        var i = 0;
-        foreach (var wp in workshop.WorkShopParticipants)
-        {
-            if (i == 0)
-            {
-                query.Append($"?userIds={wp.UserId}");
-            }
-            else
-            {
-                query.Append($"&userIds={wp.UserId}");
-            }
-            i++;
-        }
-        using var httpClient = new HttpClient();
-        httpClient.BaseAddress = new Uri("http://localhost:5046");
-        var response = await httpClient.GetAsync($"users{query.ToString()}");
-        if (!response.IsSuccessStatusCode)
-        {
-            logger.LogError("Coud not get participants from the users api.");
-            return Results.StatusCode(500);
-        }
-        participants = await response.Content.ReadFromJsonAsync<ExternalUser[]>(new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        });
-    }
-    return Results.Ok(new
-    {
-        Id = workshop.Id,
-        Title = workshop.Title,
-        Description = workshop.Description,
-        Participants = participants
+        return Task.CompletedTask;
     });
-}).WithOpenApi();
+app.MapGet("/workshops/{id}", async (int id, WorkshopDbContext db, ILogger<Program> logger) =>
+    {
+        var workshop = await db.Workshops.Include(w => w.WorkShopParticipants).FirstOrDefaultAsync(w => w.Id == id);
+        if (workshop is null)
+        {
+            return Results.NotFound($"No workshop with id {id} exists");
+        }
+        var participants = new ExternalUser[] { };
+        var query = new StringBuilder();
+        if (workshop.WorkShopParticipants.Any())
+        {
+            var i = 0;
+            foreach (var wp in workshop.WorkShopParticipants)
+            {
+                if (i == 0)
+                {
+                    query.Append($"?userIds={wp.UserId}");
+                }
+                else
+                {
+                    query.Append($"&userIds={wp.UserId}");
+                }
+                i++;
+            }
+            using var httpClient = new HttpClient();
+            httpClient.BaseAddress = new Uri("http://localhost:5046");
+            var response = await httpClient.GetAsync($"users{query.ToString()}");
+            if (!response.IsSuccessStatusCode)
+            {
+                logger.LogError("Coud not get participants from the users api.");
+                return Results.StatusCode(500);
+            }
+            participants = await response.Content.ReadFromJsonAsync<ExternalUser[]>(new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
+        }
+        return Results.Ok(new
+        {
+            Id = workshop.Id,
+            Title = workshop.Title,
+            Description = workshop.Description,
+            Participants = participants
+        });
+    })
+    .AddOpenApiOperationTransformer((operation, context, ct) =>
+    {
+        return Task.CompletedTask;
+    });
 app.MapDelete("/workshops/{id}", async (int id, WorkshopDbContext db) =>
-{
-    var workshop = await db.Workshops.FirstOrDefaultAsync(w => w.Id == id);
-    if (workshop is null)
     {
-        return Results.NotFound($"No workshop with id {id} exists");
-    }
-    db.Workshops.Remove(workshop);
-    await db.SaveChangesAsync();
-    return Results.NoContent();
-}).WithOpenApi();
+        var workshop = await db.Workshops.FirstOrDefaultAsync(w => w.Id == id);
+        if (workshop is null)
+        {
+            return Results.NotFound($"No workshop with id {id} exists");
+        }
+        db.Workshops.Remove(workshop);
+        await db.SaveChangesAsync();
+        return Results.NoContent();
+    })
+    .AddOpenApiOperationTransformer((operation, context, ct) =>
+    {
+        return Task.CompletedTask;
+    });
 app.MapPost("/workshops", async ([FromBody] WorkshopCreateModel model, WorkshopDbContext db) =>
-{
-    var entity = new Workshop
     {
-        Id = 0,
-        Title = model.Title,
-        Description = model.Description
-    };
-    db.Workshops.Add(entity);
-    await db.SaveChangesAsync();
-    return Results.Ok(entity);
-}).WithOpenApi();
+        var entity = new Workshop
+        {
+            Id = 0,
+            Title = model.Title,
+            Description = model.Description
+        };
+        db.Workshops.Add(entity);
+        await db.SaveChangesAsync();
+        return Results.Ok(entity);
+    })
+    .AddOpenApiOperationTransformer((operation, context, ct) =>
+    {
+        return Task.CompletedTask;
+    });
 app.MapPut("/workshops", async ([FromBody] Workshop model, WorkshopDbContext db) =>
-{
-    var current = await db.Workshops.FirstOrDefaultAsync(w => w.Id == model.Id);
-    if (current is null)
     {
-        return Results.NotFound($"No workshop with id {model.Id} exists");
-    }
-    current.Title = model.Title;
-    current.Description = model.Description;
-    await db.SaveChangesAsync();
-    return Results.Ok(current);
-}).WithOpenApi();
+        var current = await db.Workshops.FirstOrDefaultAsync(w => w.Id == model.Id);
+        if (current is null)
+        {
+            return Results.NotFound($"No workshop with id {model.Id} exists");
+        }
+        current.Title = model.Title;
+        current.Description = model.Description;
+        await db.SaveChangesAsync();
+        return Results.Ok(current);
+    })
+    .AddOpenApiOperationTransformer((operation, context, ct) =>
+    {
+        return Task.CompletedTask;
+    });
 app.MapPost("/workshops/participant", async ([FromBody] AddParticipantModel model, WorkshopDbContext db) =>
-{
-    var exist = await db.WorkShopParticipants.AnyAsync(x => x.UserId == model.UserId && x.WorkshopId == model.WorkshopId);
-    if (exist)
     {
-        return Results.BadRequest("The user is also stored as participant");
-    }
-    var entity = new WorkshopParticipant
+        var exist = await db.WorkShopParticipants.AnyAsync(x => x.UserId == model.UserId && x.WorkshopId == model.WorkshopId);
+        if (exist)
+        {
+            return Results.BadRequest("The user is also stored as participant");
+        }
+        var entity = new WorkshopParticipant
+        {
+            Id = 0,
+            WorkshopId = model.WorkshopId,
+            UserId = model.UserId
+        };
+        var workshops = db.WorkShopParticipants.Add(entity);
+        await db.SaveChangesAsync();
+        return Results.Created();
+    })
+    .AddOpenApiOperationTransformer((operation, context, ct) =>
     {
-        Id = 0,
-        WorkshopId = model.WorkshopId,
-        UserId = model.UserId
-    };
-    var workshops = db.WorkShopParticipants.Add(entity);
-    await db.SaveChangesAsync();
-    return Results.Created();
-}).WithOpenApi();
+        return Task.CompletedTask;
+    });
 app.MapDelete("/workshops/{wid}/participant/{uid}", async (int wid, int uid, WorkshopDbContext db) =>
-{
-    var entity = await db.WorkShopParticipants.FirstOrDefaultAsync(x => x.UserId == uid && x.WorkshopId == wid);
-    if (entity is null)
     {
-        return Results.BadRequest("The provided user is no participant in the provided workshop");
-    }
-    var workshops = db.WorkShopParticipants.Remove(entity);
-    await db.SaveChangesAsync();
-    return Results.NoContent();
-}).WithOpenApi();
+        var entity = await db.WorkShopParticipants.FirstOrDefaultAsync(x => x.UserId == uid && x.WorkshopId == wid);
+        if (entity is null)
+        {
+            return Results.BadRequest("The provided user is no participant in the provided workshop");
+        }
+        var workshops = db.WorkShopParticipants.Remove(entity);
+        await db.SaveChangesAsync();
+        return Results.NoContent();
+    })
+    .AddOpenApiOperationTransformer((operation, context, ct) =>
+    {
+        return Task.CompletedTask;
+    });
 app.Run();
 
 public class WorkshopCreateModel

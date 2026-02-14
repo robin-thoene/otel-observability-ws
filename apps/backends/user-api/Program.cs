@@ -17,19 +17,22 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 app.MapGet("/users", async (UserDbContext db, ILogger<Program> logger, int[]? userIds, string? s) =>
-{
-    var query = db.Users.AsQueryable();
-    if (userIds is not null && userIds.Any())
     {
-        query = query.Where(u => userIds.Contains(u.Id));
-    }
-    if (!string.IsNullOrEmpty(s))
+        var query = db.Users.AsQueryable();
+        if (userIds is not null && userIds.Any())
+        {
+            query = query.Where(u => userIds.Contains(u.Id));
+        }
+        if (!string.IsNullOrEmpty(s))
+        {
+            query = query.Where(u => u.LastName.Contains(s, StringComparison.InvariantCultureIgnoreCase) || u.FirstName.Contains(s, StringComparison.InvariantCultureIgnoreCase));
+        }
+        var users = await query.ToListAsync();
+        logger.LogInformation("Found {UserCount} users", users.Count());
+        return Results.Ok(users);
+    })
+    .AddOpenApiOperationTransformer((operation, context, ct) =>
     {
-        query = query.Where(u => u.LastName.Contains(s, StringComparison.InvariantCultureIgnoreCase) || u.FirstName.Contains(s, StringComparison.InvariantCultureIgnoreCase));
-    }
-    var users = await query.ToListAsync();
-    logger.LogInformation("Found {UserCount} users", users.Count());
-    return Results.Ok(users);
-})
-.WithOpenApi();
+        return Task.CompletedTask;
+    });
 app.Run();
