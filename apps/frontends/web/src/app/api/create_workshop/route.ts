@@ -16,6 +16,6 @@ export async function POST(request: Request) {
     return NextResponse.json(result);
   }
   return new Response("Error creating workshop", {
-    status: 500,
+    status: res.status,
   });
 }

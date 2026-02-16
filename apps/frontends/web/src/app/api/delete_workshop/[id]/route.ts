@@ -19,6 +19,6 @@ export async function DELETE(
     return new Response();
   }
   return new Response("Error deleting workshop", {
-    status: 500,
+    status: res.status,
   });
 }

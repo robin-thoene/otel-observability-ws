@@ -17,6 +17,6 @@ export async function PUT(request: Request) {
     return NextResponse.json(result);
   }
   return new Response("Error updating workshop", {
-    status: 500,
+    status: res.status,
   });
 }
