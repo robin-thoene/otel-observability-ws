@@ -14,6 +14,6 @@ export async function POST(request: Request) {
     return new Response();
   }
   return new Response("Error adding user to workshop", {
-    status: 500,
+    status: res.status,
   });
 }

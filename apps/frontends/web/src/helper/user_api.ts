@@ -11,6 +11,9 @@ export async function getUsers(searchTerm?: string | null) {
     cache: "no-store",
   });
   if (!response.ok) {
+    if (response.status === 404) {
+      return [];
+    }
     return null;
   }
   return (await response.json()) as IUser[];

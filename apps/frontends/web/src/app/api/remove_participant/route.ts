@@ -14,6 +14,6 @@ export async function DELETE(request: Request) {
     return new Response();
   }
   return new Response("Error deleting participant", {
-    status: 500,
+    status: res.status,
   });
 }
