@@ -36,6 +36,20 @@ dotnet run --project ./apps/backends/workshop-api/WorkshopApi.csproj
 npm run dev --prefix ./apps/frontends/web
 ```
 
+If you want proper hot reloading for the apps when your startup configuration changed:
+
+```shell
+watchexec -w ./apps/backends/workshop-api/ -e cs -r -- dotnet run --project ./apps/backends/user-api/UserApi.csproj
+```
+
+```shell
+watchexec -w ./apps/backends/workshop-api/ -e cs -r -- dotnet run --project ./apps/backends/workshop-api/WorkshopApi.csproj
+```
+
+```shell
+watchexec -w ./apps/frontends/web/src/instrumentation.otel.ts -r -- npm run dev --prefix ./apps/frontends/web
+```
+
 ## Applications to instrument
 
 This repository provides the following applications that interact with each other:
