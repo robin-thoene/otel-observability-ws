@@ -21,16 +21,15 @@ To participate in the workshop, you will need the following things on your devel
 
 ## Debugging quick start
 
-By running the following commands inside the root directory of this repository you will be able to start all
-the applications with hot reloading enabled, so that changes to the source code made during the workshop are
-applied without the need to restart the applications.
+By running the following commands inside the root directory of this repository you will be able to
+start all the applications used for this example:
 
 ```shell
-dotnet watch --project ./apps/backends/user-api/UserApi.csproj
+dotnet run --project ./apps/backends/user-api/UserApi.csproj
 ```
 
 ```shell
-dotnet watch --project ./apps/backends/workshop-api/WorkshopApi.csproj
+dotnet run --project ./apps/backends/workshop-api/WorkshopApi.csproj
 ```
 
 ```shell
