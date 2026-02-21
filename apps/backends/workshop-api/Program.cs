@@ -3,6 +3,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
+const int WS_TITLE_MAX_LEN = 30;
 var builder = WebApplication.CreateBuilder(args);
 // TODO: add OpenTelemetry instrumentation here
 builder.Services.AddEndpointsApiExplorer();
@@ -93,8 +94,13 @@ app.MapDelete("/workshops/{id}", async (int id, WorkshopDbContext db) =>
     {
         return Task.CompletedTask;
     });
-app.MapPost("/workshops", async ([FromBody] WorkshopCreateModel model, WorkshopDbContext db) =>
+app.MapPost("/workshops", async ([FromBody] WorkshopCreateModel model, WorkshopDbContext db, ILogger<Program> logger) =>
     {
+        if (model.Title.Length > WS_TITLE_MAX_LEN)
+        {
+            logger.LogError("The provided workshop title {WorkshopTitle} is not valid for creation. Title exceeds max lenght {WorkshopTitleMaxLen}", model.Title, WS_TITLE_MAX_LEN);
+            return Results.BadRequest();
+        }
         var entity = new Workshop
         {
             Id = 0,
@@ -109,8 +115,13 @@ app.MapPost("/workshops", async ([FromBody] WorkshopCreateModel model, WorkshopD
     {
         return Task.CompletedTask;
     });
-app.MapPut("/workshops", async ([FromBody] Workshop model, WorkshopDbContext db) =>
+app.MapPut("/workshops", async ([FromBody] Workshop model, WorkshopDbContext db, ILogger<Program> logger) =>
     {
+        if (model.Title.Length > WS_TITLE_MAX_LEN)
+        {
+            logger.LogError("The provided workshop title {WorkshopTitle} is not valid for updating. Title exceeds max lenght {WorkshopTitleMaxLen}", model.Title, WS_TITLE_MAX_LEN);
+            return Results.BadRequest();
+        }
         var current = await db.Workshops.FirstOrDefaultAsync(w => w.Id == model.Id);
         if (current is null)
         {
@@ -181,3 +192,4 @@ public class ExternalUser
     public required string FirstName { get; set; }
     public required string LastName { get; set; }
 }
+
