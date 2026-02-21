@@ -18,19 +18,18 @@
     "@opentelemetry/sdk-trace-node": "^2.5.0",
     "@opentelemetry/semantic-conventions": "^1.39.0",
     "@tailwindcss/postcss": "^4.1.18",
-    "postcss": "^8",
-    "tailwindcss": "^4.1.18",
     "next": "^16.1.6",
+    "postcss": "^8",
     "react": "^19",
     "react-dom": "^19",
-    "react-toastify": "^11.0.5"
+    "react-toastify": "^11.0.5",
+    "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
     "@types/node": "^25",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "^16.1.6",
+    "eslint": "^10.0.1",
     "typescript": "^5"
   }
 }
