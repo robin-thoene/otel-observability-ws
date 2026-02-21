@@ -43,7 +43,7 @@ watchexec -w ./apps/backends/workshop-api/ -e cs -r -- dotnet run --project ./ap
 ```
 
 ```shell
-watchexec -w ./apps/backends/workshop-api/ -e cs -r -- dotnet run --project ./apps/backends/workshop-api/WorkshopApi.csproj
+watchexec -w ./apps/backends/user-api/ -e cs -r -- dotnet run --project ./apps/backends/user-api/UserApi.csproj
 ```
 
 ```shell
