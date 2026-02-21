@@ -29,6 +29,12 @@ app.MapGet("/users", async (UserDbContext db, ILogger<Program> logger, int[]? us
         }
         var users = await query.ToListAsync();
         logger.LogInformation("Found {UserCount} users", users.Count());
+        var tasks = new List<Task>();
+        foreach (var user in users)
+        {
+            // Mock of getting additional info about the user from an external system
+            await Task.Run(async () => await Task.Delay(500));
+        }
         return Results.Ok(users);
     })
     .AddOpenApiOperationTransformer((operation, context, ct) =>
