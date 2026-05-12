@@ -14,7 +14,7 @@
     "@opentelemetry/exporter-trace-otlp-grpc": "^0.211.0",
     "@opentelemetry/instrumentation-undici": "^0.21.0",
     "@opentelemetry/resources": "^2.5.0",
-    "@opentelemetry/sdk-node": "^0.211.0",
+    "@opentelemetry/sdk-node": "^0.217.0",
     "@opentelemetry/sdk-trace-node": "^2.5.0",
     "@opentelemetry/semantic-conventions": "^1.39.0",
     "@tailwindcss/postcss": "^4.1.18",
